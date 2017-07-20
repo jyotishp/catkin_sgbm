@@ -18,7 +18,16 @@ using namespace sensor_msgs;
 using namespace message_filters;
 using namespace cv;
 
-image_transport::Publisher disparity_pub, image_left_pub, image_right_pub;
+image_transport::Publisher disparity_pub, image_left_pub, image_right_pub, depth_pub;
+
+void onClick( int event, int x, int y, int, void* )
+{
+	if( event != CV_EVENT_LBUTTONDOWN )
+		return;
+
+	Point pt = Point(x,y);
+	std::cout << "x = " << pt.x << "\t y = " << pt.y << std::endl;
+}
 
 void callback(const ImageConstPtr& image_left, const ImageConstPtr& image_right)
 {
@@ -80,12 +89,12 @@ void callback(const ImageConstPtr& image_left, const ImageConstPtr& image_right)
 	cvtColor(right_image_rect, right_image_gray, CV_BGR2GRAY);
 
 	StereoBM sbm;
-	sbm.state->SADWindowSize = 5;
+	sbm.state->SADWindowSize = 21;
 	sbm.state->numberOfDisparities = 128;
 	sbm.state->preFilterSize = 9;
 	sbm.state->preFilterCap = 31;
 	sbm.state->minDisparity = 0;
-	sbm.state->textureThreshold = 10;
+	sbm.state->textureThreshold = 500;
 	sbm.state->uniquenessRatio = 1;
 	sbm.state->speckleWindowSize = 100;
 	sbm.state->speckleRange = 4;
@@ -94,19 +103,49 @@ void callback(const ImageConstPtr& image_left, const ImageConstPtr& image_right)
 
 	normalize(disparity, disparity_image, 0, 255, CV_MINMAX, CV_8U);
 
+	Mat Q = Mat(4, 4, CV_32FC1);
+	// stereoRectify(intrinsic_left, intrinsic_right, distortion_left, distortion_right, left_image->image.size(), R, T, R1, R2, P1, P2, Q);
+	Q.at<double>(0,0)=1.0;
+	Q.at<double>(0,1)=0.0;
+	Q.at<double>(0,2)=0.0;
+	Q.at<double>(0,3)=-3.9986589950323105e+02;
+	Q.at<double>(1,0)=0.0;
+	Q.at<double>(1,1)=1.0;
+	Q.at<double>(1,2)=0.0;
+	Q.at<double>(1,3)=-2.6547610736638308e+02;
+	Q.at<double>(2,0)=0.0;
+	Q.at<double>(2,1)=0.0;
+	Q.at<double>(2,2)=0.0;
+	Q.at<double>(2,3)=4.7435756507001634e+02;
+	Q.at<double>(3,0)=0.0;
+	Q.at<double>(3,1)=0.0;
+	Q.at<double>(3,2)=-4.7435756507001634e+02/(9.5302534383415178e+01);
+	Q.at<double>(3,3)=0;
+
+	Mat depth, depth_image;
+	// cvTranspose(&depth, &matrixTr);
+	reprojectImageTo3D(disparity, depth, Q, (int)false);
+	normalize(depth, depth_image, 0, 255, CV_MINMAX, CV_8U);
+
+	std::cout << "Disparity: " << disparity.at<double>(148,366) << std::endl;
+	std::cout << "Depth: " << left_info.K[0] * 0.204 / disparity.at<double>(132,383) << std::endl;
+
 	std_msgs::Header header;
 	header.stamp = ros::Time::now();
 
 	ImagePtr disparity_msg = cv_bridge::CvImage(header, "32FC1", disparity).toImageMsg();
 	ImagePtr image_left_msg = cv_bridge::CvImage(header, "bgr8", left_image_rect).toImageMsg();
 	ImagePtr image_right_msg = cv_bridge::CvImage(header, "bgr8", right_image_rect).toImageMsg();
+	ImagePtr depth_msg = cv_bridge::CvImage(header, "32FC1", depth).toImageMsg();
 
 	disparity_pub.publish(disparity_msg);
 	image_left_pub.publish(image_left_msg);
 	image_right_pub.publish(image_right_msg);
+	depth_pub.publish(depth_msg);
 
-	imshow("Disparity", disparity_image);
 	imshow("left_rect_color", left_image_rect);
+	imshow("Disparity", disparity_image);
+	imshow("Depth", depth_image);
 }
 
 int main(int argc, char** argv)
@@ -118,11 +157,14 @@ int main(int argc, char** argv)
 
 	image_transport::ImageTransport it(pub);
 	disparity_pub = it.advertise("sync/disparity", 1);
+	depth_pub = it.advertise("sync/depth", 1);
 	image_left_pub = it.advertise("sync/left/image_rect_color", 1);
 	image_right_pub = it.advertise("sync/right/image_rect_color", 1);
 
 	namedWindow("Disparity");
 	namedWindow("left_rect_color");
+	setMouseCallback("left_rect_color", onClick, 0);
+	namedWindow("Depth");
 	startWindowThread();
 
 	message_filters::Subscriber<Image> image_left_sub(nh, "left_rgb/image", 1);
@@ -135,6 +177,7 @@ int main(int argc, char** argv)
 	ros::spin();
 	destroyWindow("left_rect_color");
 	destroyWindow("Disparity");
+	destroyWindow("Depth");
 
 	return 0;
 }

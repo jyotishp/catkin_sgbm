@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(opencv_sgbm)
+project(subscribers)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
 # add_definitions(-std=c++11)
@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
-  camera_calibration_parsers
 )
 
 find_package(OpenCV)
@@ -111,7 +110,7 @@ find_package(OpenCV)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES opencv_sgbm
+#  LIBRARIES subscribers
 #  CATKIN_DEPENDS cv_bridge image_transport message_filters nav_msgs opencv roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
@@ -125,12 +124,11 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/opencv_sgbm.cpp
+#   src/${PROJECT_NAME}/subscribers.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -141,7 +139,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/opencv_sgbm_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/subscribers_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -198,7 +196,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_opencv_sgbm.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_subscribers.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -206,11 +204,5 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(sgbm src/sgbm.cpp)
-target_link_libraries(sgbm ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-
-add_executable(bm src/bm.cpp)
-target_link_libraries(bm ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-
-add_executable(test src/test.cpp)
-target_link_libraries(test ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+add_executable(depth_conv src/depth_conv.cpp)
+target_link_libraries(depth_conv ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
