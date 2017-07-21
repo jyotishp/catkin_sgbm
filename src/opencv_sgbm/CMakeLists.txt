@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   camera_calibration_parsers
 )
 
-find_package(OpenCV)
+find_package(OpenCV 2)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -76,10 +76,11 @@ find_package(OpenCV)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
+generate_messages(
 #   DEPENDENCIES
 #   nav_msgs#   sensor_msgs#   std_msgs
-# )
+    OpenCV
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -213,5 +214,5 @@ target_link_libraries(sgbm ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 add_executable(bm src/bm.cpp)
 target_link_libraries(bm ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
-add_executable(test src/test.cpp)
-target_link_libraries(test ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+#add_executable(test src/test.cpp)
+#target_link_libraries(test ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
