@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   sensor_msgs
+  stereo_msgs
   std_msgs
   camera_calibration_parsers
 )
