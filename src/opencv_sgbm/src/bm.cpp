@@ -52,7 +52,7 @@ void onClick( int event, int x, int y, int, void* )
 		return;
 
 	Point pt = Point(x,y);
-	std::cout << "Depth at (" << pt.x << "," << pt.y << ") : " << right_info.P[3] * 16 / disparity.at<short>(pt.y, pt.x) << std::endl;
+	std::cout << "Depth at (" << pt.x << "," << pt.y << ") : " << -right_info.P[3] * 16 / disparity.at<short>(pt.y, pt.x) << std::endl;
 	// std::cout << "Depth at (" << pt.x << "," << pt.y << ") : " << (float)depth.at<Vec3f>(pt.y, pt.x)[2] << std::endl;
 	std::cout << "Disparity at (" << pt.x << "," << pt.y << ") : " << disparity.at<short>(pt.y, pt.x) / 16 << std::endl;
 	// std::cout << type2str(disparity.type()) << std::endl;
@@ -81,8 +81,8 @@ void callback(const ImageConstPtr& image_left, const ImageConstPtr& image_right)
 	Mat D2 = Mat(5, 1, CV_32FC1);
 	Mat R1 = Mat(3, 3, CV_32FC1);
 	Mat R2 = Mat(3, 3, CV_32FC1);
-	Mat P1 = Mat(4, 3, CV_32FC1);
-	Mat P2 = Mat(4, 3, CV_32FC1);
+	Mat P1 = Mat(3, 4, CV_32FC1);
+	Mat P2 = Mat(3, 4, CV_32FC1);
 	Mat R = Mat(3,3, CV_32FC1);
 
 	K1.at<float>(0,0) = left_info.K[0];

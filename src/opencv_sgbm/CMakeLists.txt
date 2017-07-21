@@ -76,11 +76,11 @@ find_package(OpenCV 2)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-#   DEPENDENCIES
-#   nav_msgs#   sensor_msgs#   std_msgs
-    OpenCV
-)
+# generate_messages(
+# #   DEPENDENCIES
+# #   nav_msgs#   sensor_msgs#   std_msgs
+#     OpenCV
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
